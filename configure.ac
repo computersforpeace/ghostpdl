@@ -2460,6 +2460,17 @@ AC_SUBST(OPT_CFLAGS)
 AC_SUBST(DBG_CFLAGS)
 AC_SUBST(GCFLAGS)
 
+dnl Let environment provide CCAUX, or default to target compiler
+if test "x${is_cross_compiler}" = "xno"; then
+  CCAUX="${CCAUX:-${CC}}"
+else
+  CCAUX="${CCAUX:-cc}"
+fi
+dnl Provide reasonable default AUX CFLAGS
+CFLAGSAUX="${CFLAGSAUX:--O}"
+AC_SUBST(CCAUX)
+AC_SUBST(CFLAGSAUX)
+
 AC_OUTPUT(Makefile)
 
 if test "x$AFS" = "x1"; then
