@@ -418,6 +418,9 @@ if test x"$large_color_index" != "x0"; then
      fi
     fi
    fi
+   if test "x${color_ind_type}" != "xnone"; then
+     ARCH_SIZEOF_GX_COLOR_INDEX=8
+   fi
 else
   dnl try to find a 32 bit type for devicen color index
   color_ind_type="none"
@@ -439,6 +442,9 @@ else
       fi
      fi
     fi
+   fi
+   if test "x${color_ind_type}" != "xnone"; then
+     ARCH_SIZEOF_GX_COLOR_INDEX=4
    fi
 fi
 
@@ -2450,6 +2456,111 @@ else
 fi
 
 AC_SUBST(EXEEXT)
+
+# --------------------------------------------------
+# Generate arch.h headers
+# --------------------------------------------------
+AC_CHECK_ALIGNOF([short])
+AC_CHECK_ALIGNOF([int])
+AC_CHECK_ALIGNOF([long])
+AC_CHECK_ALIGNOF([void *])
+AC_CHECK_ALIGNOF([float])
+AC_CHECK_ALIGNOF([double])
+
+AC_SUBST(ARCH_ALIGN_SHORT_MOD, $ac_cv_alignof_short)
+AC_SUBST(ARCH_ALIGN_INT_MOD, $ac_cv_alignof_int)
+AC_SUBST(ARCH_ALIGN_LONG_MOD, $ac_cv_alignof_long)
+AC_SUBST(ARCH_ALIGN_PTR_MOD, $ac_cv_alignof_void_p)
+AC_SUBST(ARCH_ALIGN_FLOAT_MOD, $ac_cv_alignof_float)
+AC_SUBST(ARCH_ALIGN_DOUBLE_MOD, $ac_cv_alignof_double)
+
+AC_CHECK_SIZEOF([char])
+AC_CHECK_SIZEOF([short])
+AC_CHECK_SIZEOF([int])
+AC_CHECK_SIZEOF([long])
+AC_CHECK_SIZEOF([long long])
+AC_CHECK_SIZEOF([void *])
+AC_CHECK_SIZEOF([float])
+AC_CHECK_SIZEOF([double])
+
+AC_SUBST(ARCH_SIZEOF_CHAR, $ac_cv_sizeof_char)
+AC_COMPUTE_INT(ARCH_LOG2_SIZEOF_CHAR, ffs($ac_cv_sizeof_char) - 1, [#include <string.h>])
+AC_SUBST(ARCH_LOG2_SIZEOF_CHAR)
+
+AC_SUBST(ARCH_SIZEOF_SHORT, $ac_cv_sizeof_short)
+AC_COMPUTE_INT(ARCH_LOG2_SIZEOF_SHORT, ffs($ac_cv_sizeof_short) - 1, [#include <string.h>])
+AC_SUBST(ARCH_LOG2_SIZEOF_SHORT)
+
+AC_SUBST(ARCH_SIZEOF_INT, $ac_cv_sizeof_int)
+AC_COMPUTE_INT(ARCH_LOG2_SIZEOF_INT, ffs($ac_cv_sizeof_int) - 1, [#include <string.h>])
+AC_SUBST(ARCH_LOG2_SIZEOF_INT)
+
+AC_SUBST(ARCH_SIZEOF_LONG, $ac_cv_sizeof_long)
+AC_COMPUTE_INT(ARCH_LOG2_SIZEOF_LONG, ffs($ac_cv_sizeof_long) - 1, [#include <string.h>])
+AC_SUBST(ARCH_LOG2_SIZEOF_LONG)
+
+AC_SUBST(ARCH_SIZEOF_LONG_LONG, $ac_cv_sizeof_long_long)
+AC_COMPUTE_INT(ARCH_LOG2_SIZEOF_LONG_LONG, ffs($ac_cv_sizeof_long_long) - 1, [#include <string.h>])
+AC_SUBST(ARCH_LOG2_SIZEOF_LONG_LONG)
+
+AC_SUBST(ARCH_SIZEOF_PTR, $ac_cv_sizeof_void_p)
+AC_COMPUTE_INT(ARCH_LOG2_SIZEOF_PTR, ffs($ac_cv_sizeof_void_p) - 1, [#include <string.h>])
+AC_SUBST(ARCH_LOG2_SIZEOF_PTR)
+
+AC_SUBST(ARCH_SIZEOF_FLOAT, $ac_cv_sizeof_float)
+AC_COMPUTE_INT(ARCH_LOG2_SIZEOF_FLOAT, ffs($ac_cv_sizeof_float) - 1, [#include <string.h>])
+AC_SUBST(ARCH_LOG2_SIZEOF_FLOAT)
+
+AC_SUBST(ARCH_SIZEOF_DOUBLE, $ac_cv_sizeof_double)
+AC_COMPUTE_INT(ARCH_LOG2_SIZEOF_DOUBLE, ffs($ac_cv_sizeof_double) - 1, [#include <string.h>])
+AC_SUBST(ARCH_LOG2_SIZEOF_DOUBLE)
+
+AC_SUBST(ARCH_IS_BIG_ENDIAN, $BIGENDIAN)
+
+AC_MSG_CHECKING([if pointers are signed])
+AC_COMPILE_IFELSE(
+  [AC_LANG_PROGRAM([#include <stdint.h>], [
+    char b[[(char *)(uintptr_t)-1 < (char *)(uintptr_t)0 ? -1 : 0]];
+    return sizeof(b);
+  ])],
+  [ARCH_PTRS_ARE_SIGNED=0; AC_MSG_RESULT(no)], [ARCH_PTRS_ARE_SIGNED=1; AC_MSG_RESULT(yes)])
+AC_SUBST(ARCH_PTRS_ARE_SIGNED)
+
+AC_MSG_CHECKING([if dividing negative by positive truncates])
+AC_COMPILE_IFELSE(
+  [AC_LANG_PROGRAM([], [
+    char b[[-1 / 2 == 0 ? -1 : 0]];
+    return sizeof(b);
+  ])],
+  [ARCH_DIV_NEG_POS_TRUNCATES=0; AC_MSG_RESULT(no)], [ARCH_DIV_NEG_POS_TRUNCATES=1; AC_MSG_RESULT(yes)])
+AC_SUBST(ARCH_DIV_NEG_POS_TRUNCATES)
+
+AC_MSG_CHECKING([if arithmetic shift works properly])
+ARCH_ARITH_RSHIFT=""
+AC_COMPILE_IFELSE(
+  [AC_LANG_PROGRAM([], [
+    char b[[(-1L >> 2) != -1 || (-1 >> 1) != -1 || (-1 >> 2) != -1 ? 0 : -1]];
+    return sizeof(b);
+  ])],
+  [ARCH_ARITH_RSHIFT=0; AC_MSG_RESULT(no)])
+if test "x${ARCH_ARITH_RSHIFT}" = "x"; then
+  # Turbo C problem
+  AC_COMPILE_IFELSE(
+    [AC_LANG_PROGRAM([], [
+      char b[[(-1L >> 2) != -1 ? 0 : -1]];
+      return sizeof(b);
+    ])],
+    [ARCH_ARITH_RSHIFT=1; AC_MSG_RESULT(no)])
+fi
+if test "x${ARCH_ARITH_RSHIFT}" = "x"; then
+  AC_MSG_RESULT(yes)
+  ARCH_ARITH_RSHIFT=2
+fi
+AC_SUBST(ARCH_ARITH_RSHIFT)
+
+AC_SUBST(ARCH_SIZEOF_GX_COLOR_INDEX)
+
+AC_OUTPUT(arch.h)
 
 dnl --------------------------------------------------
 dnl Do substitutions

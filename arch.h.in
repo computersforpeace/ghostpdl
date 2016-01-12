@@ -1,0 +1,62 @@
+         /* ---------------- Scalar alignments ---------------- */
+
+#define ARCH_ALIGN_SHORT_MOD		@ARCH_ALIGN_SHORT_MOD@
+#define ARCH_ALIGN_INT_MOD		@ARCH_ALIGN_INT_MOD@
+#define ARCH_ALIGN_LONG_MOD		@ARCH_ALIGN_LONG_MOD@
+#define ARCH_ALIGN_PTR_MOD		@ARCH_ALIGN_PTR_MOD@
+#define ARCH_ALIGN_FLOAT_MOD		@ARCH_ALIGN_FLOAT_MOD@
+#define ARCH_ALIGN_DOUBLE_MOD		@ARCH_ALIGN_DOUBLE_MOD@
+
+         /* ---------------- Scalar sizes ---------------- */
+
+#define ARCH_LOG2_SIZEOF_CHAR		@ARCH_LOG2_SIZEOF_CHAR@
+#define ARCH_LOG2_SIZEOF_SHORT		@ARCH_LOG2_SIZEOF_SHORT@
+#define ARCH_LOG2_SIZEOF_INT		@ARCH_LOG2_SIZEOF_INT@
+#define ARCH_LOG2_SIZEOF_LONG		@ARCH_LOG2_SIZEOF_LONG@
+#define ARCH_LOG2_SIZEOF_LONG_LONG	@ARCH_LOG2_SIZEOF_LONG_LONG@
+#define ARCH_LOG2_SIZEOF_PTR		@ARCH_LOG2_SIZEOF_PTR@
+#define ARCH_LOG2_SIZEOF_FLOAT		@ARCH_LOG2_SIZEOF_FLOAT@
+#define ARCH_LOG2_SIZEOF_DOUBLE		@ARCH_LOG2_SIZEOF_DOUBLE@
+
+#define ARCH_SIZEOF_CHAR		@ARCH_SIZEOF_CHAR@
+#define ARCH_SIZEOF_SHORT		@ARCH_SIZEOF_SHORT@
+#define ARCH_SIZEOF_INT			@ARCH_SIZEOF_INT@
+#define ARCH_SIZEOF_LONG		@ARCH_SIZEOF_LONG@
+#define ARCH_SIZEOF_LONG_LONG		@ARCH_SIZEOF_LONG_LONG@
+#define ARCH_SIZEOF_PTR			@ARCH_SIZEOF_PTR@
+#define ARCH_SIZEOF_FLOAT		@ARCH_SIZEOF_FLOAT@
+#define ARCH_SIZEOF_DOUBLE		@ARCH_SIZEOF_DOUBLE@
+
+         /* ---------------- Unsigned max values ---------------- */
+
+#define ARCH_MAX_UCHAR			((unsigned char)~(unsigned char)0 + (unsigned char)0)
+#define ARCH_MAX_USHORT			((unsigned short)~(unsigned short)0 + (unsigned short)0)
+#define ARCH_MAX_UINT			((unsigned int)~0 + (unsigned int)0)
+#define ARCH_MAX_ULONG			((unsigned long)~0L + (unsigned long)0)
+
+         /* ---------------- Floating point ---------------- */
+
+#if (__STDC_IEC_559__ || (FLT_RADIX == 2 && FLT_MANT_DIG == 24 \
+            && FLT_MIN_EXP == -125 && FLT_MAX_EXP == 128))
+# define ARCH_FLOATS_ARE_IEEE		1
+# define ARCH_FLOAT_MANTISSA_BITS	24
+# define ARCH_DOUBLE_MANTISSA_BITS	53
+#else
+# define ARCH_FLOATS_ARE_IEEE 0
+/*
+ * There isn't any general way to compute the number of mantissa
+ * bits accurately, especially if the machine uses hex rather
+ * than binary exponents.  Use conservative values, assuming
+ * the exponent is stored in a 16-bit word of its own.
+ */
+# define ARCH_FLOAT_MANTISSA_BITS	(sizeof(float) * 8 - 17)
+# define ARCH_DOUBLE_MANTISSA_BITS	(sizeof(double) * 8 - 17)
+#endif
+
+         /* ---------------- Miscellaneous ---------------- */
+
+#define ARCH_IS_BIG_ENDIAN		@ARCH_IS_BIG_ENDIAN@
+#define ARCH_PTRS_ARE_SIGNED		@ARCH_PTRS_ARE_SIGNED@
+#define ARCH_DIV_NEG_POS_TRUNCATES	@ARCH_DIV_NEG_POS_TRUNCATES@
+#define ARCH_ARITH_RSHIFT		@ARCH_ARITH_RSHIFT@
+#define ARCH_SIZEOF_GX_COLOR_INDEX	@ARCH_SIZEOF_GX_COLOR_INDEX@
