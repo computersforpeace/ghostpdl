@@ -141,7 +141,7 @@ prn_putc(gx_device_printer *pdev, int c)
 }
 
 static int
-prn_puts(gx_device_printer *pdev, char *ptr)
+prn_puts(gx_device_printer *pdev, const char *ptr)
 {
         if(is_printer(pdev)) {
                 while(*ptr)
@@ -152,7 +152,7 @@ prn_puts(gx_device_printer *pdev, char *ptr)
 }
 
 static int
-prn_write(gx_device_printer *pdev, char *ptr, int size)
+prn_write(gx_device_printer *pdev, const char *ptr, int size)
 {
         if(is_printer(pdev)) {
                 while(size --)
