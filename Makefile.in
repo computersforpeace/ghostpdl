@@ -361,7 +361,6 @@ RANLIB=@RANLIB@
 
 CC=@CC@
 CCAUX=@CCAUX@
-CFLAGSAUX=@CFLAGSAUX@
 
 # Define the name of the linker for the final link step.
 # Normally this is the same as the C compiler.
@@ -371,6 +370,9 @@ CCAUXLD=$(CCAUX)
 
 # Define the default gcc flags.
 GCFLAGS=@CPPFLAGS@ @GCFLAGS@ @CFLAGS@
+
+# TODO: GCFLAGS is partly reusable (?) but probably not entirely
+CFLAGSAUX=@CFLAGSAUX@ @GCFLAGS@
 
 # Define the added flags for standard, debugging, profiling 
 # and shared object builds.

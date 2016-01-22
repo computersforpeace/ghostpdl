@@ -2577,9 +2577,8 @@ if test "x${is_cross_compiler}" = "xno"; then
 else
   CCAUX="${CCAUX:-cc}"
 fi
-dnl Provide reasonable default AUX CFLAGS
-CFLAGSAUX="${CFLAGSAUX:--O}"
 AC_SUBST(CCAUX)
+dnl Pass along from environment
 AC_SUBST(CFLAGSAUX)
 
 AC_OUTPUT(Makefile)
