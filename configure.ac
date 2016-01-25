@@ -30,6 +30,11 @@ CPPFLAGS="${CPPFLAGS:=}"
 CXXFLAGS="${CXXFLAGS:=}"
 LDFLAGS="${LDFLAGS:=}"
 
+# save these for later
+OPARMS=$@
+
+THEMAKEFILE="${MAKEFILE:=Makefile}"
+
 dnl --------------------------------------------------
 dnl List of non-threadsafe devices
 dnl defined at the top of the file for ease of access
@@ -90,6 +95,21 @@ save_cflags=$CFLAGS
 AC_PROG_CC
 AC_PROG_CPP
 CFLAGS=$save_cflags
+
+if test x"$CCAUX" != x"" ; then
+  SUBCONFPARMS=
+  for parm in $OPARMS ; do
+    SUBCONFPARMS="$(echo $parm | grep -v CC | grep -v CCAUX) $SUBCONFPARMS"
+  done
+  # rerun configure for the AUX tools, disabling a load of tests not relevant for CCAUX
+  CONFAUXDIR=auxtmp$RANDOM$RANDOM
+  mkdir $CONFAUXDIR
+  cd $CONFAUXDIR
+  ../configure CC=$CCAUX CCAUX= MAKEFILE=../auxflags.mak --without-libtiff --disable-contrib --disable-fontconfig --disable-dbus --disable-freetype --disable-fapi --disable-cups --disable-openjpeg --disable-gtk --with-libiconv=no --without-libidn --without-libpaper --without-pdftoraster --without-ijs --without-luratech --without-jbig2dec --without-x --with-drivers=""
+  mv config.log ../configaux.log
+  cd ..
+  rm -rf $CONFAUXDIR
+fi
 
 AC_PROG_SED
 dnl See if it is GNU sed or else.
@@ -460,7 +480,7 @@ dnl --------------------------------------------------
 SUBCONFIG_OPTS=""
 
 if test x$build_alias != x; then
-SUBCONFIG_OPTS="$SUBCONFIG_OPTS --build=$build_alias"
+  SUBCONFIG_OPTS="$SUBCONFIG_OPTS --build=$build_alias"
 fi
 
 dnl --------------------------------------------------
@@ -983,9 +1003,17 @@ AC_SUBST(LCMS2DIR)
 
 dnl look for libtiff, it also requires lib
 dnl png for the png output device; it also requires zlib
+AC_ARG_WITH([libtiff],  AC_HELP_STRING([--without-libtiff],
+    [disable use of libtiff]), with_libtiff=no)
+
 AC_ARG_WITH([system-libtiff], AC_HELP_STRING([--with-system-libtiff],
                                              [Force using the systems libtiff]),
             [], [with_system_libtiff=check])
+
+if test x"$with_libtiff" = x"no" ; then
+  with_system_libtiff=none
+fi
+
 TIFFDEVS=''
 FAX_DEVS=''
 XPSWRITEDEVICE=''
@@ -1073,9 +1101,11 @@ case "x$with_system_libtiff" in
             AC_MSG_NOTICE([Could not find local copy of libtiff. Disabling tiff and xps output devices.])
         fi
         ;;
+    xnone)
+        ;;
 esac
 
-if test $SHARE_LIBTIFF -eq 0; then
+if test x"$SHARE_LIBTIFF" = x"0" ; then
       echo
       echo "Running libtiff configure script..."
       olddir=`pwd`
@@ -2476,7 +2506,7 @@ AC_SUBST(OPT_CFLAGS)
 AC_SUBST(DBG_CFLAGS)
 AC_SUBST(GCFLAGS)
 
-AC_OUTPUT(Makefile)
+AC_OUTPUT($MAKEFILE)
 
 if test "x$AFS" = "x1"; then
    AC_MSG_WARN([Using "native" font scaler which is now deprecated (rather than freetype),])
