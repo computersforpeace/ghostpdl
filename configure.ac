@@ -116,17 +116,17 @@ if test x"$CCAUX" != x"" ; then
   fi
   mkdir $CONFAUXDIR
   cd $CONFAUXDIR
-  ../$0 CC="$CCAUX" CFLAGS="$CFLAGSAUX" CCAUX= CFLAGSAUX= MAKEFILE=../$AUXFLAGS_MAK --without-libtiff --disable-contrib --disable-fontconfig --disable-dbus --disable-freetype --disable-fapi --disable-cups --disable-openjpeg --disable-gtk --with-libiconv=no --without-libidn --without-libpaper --without-pdftoraster --without-ijs --without-luratech --without-jbig2dec --without-x --with-drivers=""
+  ../$0 CC="$CCAUX" CFLAGS="$CFLAGSAUX" CCAUX= CFLAGSAUX= MAKEFILE=../$AUXFLAGS_MAK --host= --build= --without-libtiff --disable-contrib --disable-fontconfig --disable-dbus --disable-freetype --disable-fapi --disable-cups --disable-openjpeg --disable-gtk --with-libiconv=no --without-libidn --without-libpaper --without-pdftoraster --without-ijs --without-luratech --without-jbig2dec --without-x --with-drivers=""
   status=$?
   cp config.log ../configaux.log
   cd $olddir
 
-  if test $status -ne 0 ; then
-    AC_MSG_ERROR([Recursive call to configure (for auxiliary tools) script failed], $status)
-  fi
-
   if test x"$enable_save_confaux" != x"yes"; then
     rm -rf $CONFAUXDIR
+  fi
+
+  if test $status -ne 0 ; then
+    AC_MSG_ERROR([Recursive call to configure (for auxiliary tools) script failed], $status)
   fi
 fi
 
@@ -149,7 +149,13 @@ AC_PROG_RANLIB
 #AC_PROG_INSTALL
 
 dnl pkg-config is used for several tests now...
-AC_PATH_PROG(PKGCONFIG, pkg-config)
+if test x"$host_alias" = x"" ; then
+  PKGCONFIGEXE=pkg-config
+else
+  PKGCONFIGEXE=$host_alias-pkg-config
+fi
+
+AC_PATH_PROG(PKGCONFIG, $PKGCONFIGEXE)
 
 dnl --------------------------------------------------  
 dnl Allow excluding the contributed drivers
@@ -498,8 +504,12 @@ dnl --------------------------------------------------
 
 SUBCONFIG_OPTS=""
 
-if test x$build_alias != x; then
+if test x"$build_alias" != x""; then
   SUBCONFIG_OPTS="$SUBCONFIG_OPTS --build=$build_alias"
+fi
+
+if test x"$host_alias" != x""; then
+  SUBCONFIG_OPTS="$SUBCONFIG_OPTS --host=$host_alias"
 fi
 
 dnl --------------------------------------------------
@@ -1194,6 +1204,10 @@ if ( test -d $srcdir/cups ); then
             # And check for a libcupsimage header
             if test "x$CUPSCONFIG" != x; then
                 AC_CHECK_HEADER([cups/raster.h],[],[CUPSCONFIG=""])
+            fi
+            # cross compiling - don't use cups-config
+            if test x"$host_alias" != x"" ; then
+              CUPSCONFIG=""
             fi
 
             if test "x$CUPSCONFIG" != x; then
