@@ -149,13 +149,7 @@ AC_PROG_RANLIB
 #AC_PROG_INSTALL
 
 dnl pkg-config is used for several tests now...
-if test x"$host_alias" = x"" ; then
-  PKGCONFIGEXE=pkg-config
-else
-  PKGCONFIGEXE=$host_alias-pkg-config
-fi
-
-AC_PATH_PROG(PKGCONFIG, $PKGCONFIGEXE)
+AC_PATH_TOOL(PKGCONFIG, pkg-config)
 
 dnl --------------------------------------------------  
 dnl Allow excluding the contributed drivers
